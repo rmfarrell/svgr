@@ -6,8 +6,18 @@ import (
   "os"
 )
 
-func init() {
+type pixel_array struct {
+  pixel_data []uint8
+  w          int
+  h          int
+}
 
+func NewPixelData(pixel_data []uint8, w,h int) pixel_array {
+  return pixel_array {
+    pixel_data: pixel_data,
+    w: w,
+    h: h,
+  }
 }
 
 func draw_rectangle(x,y uint8, color string) string {
@@ -18,22 +28,21 @@ func draw_rectangle(x,y uint8, color string) string {
   return ""
 }
 
-func Write(pixel_data []uint8, width, height int) (svg string, error error) {
-  svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", width*10, height*10)
+func (px pixel_array) Write(dest string) (svg string, error error) {
 
-  fmt.Println(width, height)
+  svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", px.w*10, px.h*10)
 
   i := 0
 
   // Iterate over rows
-  for row := 0; row < height; row++ {
+  for row := 0; row < px.h; row++ {
 
     // Iterate over columns
-    for col := 0; col < width; col++ {
+    for col := 0; col < px.w; col++ {
 
-      r:= pixel_data[i]
-      g:= pixel_data[i+1]
-      b:= pixel_data[i+2]
+      r:= px.pixel_data[i]
+      g:= px.pixel_data[i+1]
+      b:= px.pixel_data[i+2]
 
       i = i+3
       
@@ -44,14 +53,14 @@ func Write(pixel_data []uint8, width, height int) (svg string, error error) {
 
   svg += "</g></svg>"
 
-  write_file(svg)
+  write_file(svg, dest)
 
   return
 }
 
-func write_file(contents string) {
+func write_file(contents string, dest string) {
 
-  file, err := os.Create("mine.svg")
+  file, err := os.Create(dest)
   if err != nil {
     panic(err)
   }

@@ -48,7 +48,9 @@ func main() {
     panic(err.Error())
   }
 
-  write_svg.Write(pixel_data.([]uint8),int(w),int(h))
+  svgr := write_svg.NewPixelData(pixel_data.([]uint8), int(w), int(h))
+
+  svgr.Write("./dest/test.svg")
 }
 
 func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
