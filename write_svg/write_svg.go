@@ -3,7 +3,9 @@ package write_svg
 import (
   "fmt"
   "bufio"
+  _ "image"
   "os"
+  "github.com/gographics/imagick/imagick"
 )
 
 type pixel_array struct {
@@ -12,20 +14,33 @@ type pixel_array struct {
   h          int
 }
 
-func NewPixelData(pixel_data []uint8, w,h int) pixel_array {
-  return pixel_array {
-    pixel_data: pixel_data,
-    w: w,
-    h: h,
+func NewSvgr(img *os.File) pixel_array {
+
+  imagick.Initialize()
+  defer imagick.Terminate()
+
+  wand := imagick.NewMagickWand()
+
+  wand.ReadImageFile(img)
+
+  w,h := get_dimensions(wand)
+
+  wand.AdaptiveResizeImage(w/20, h/20)
+
+  w,h = get_dimensions(wand)
+
+  wand.AdaptiveSharpenImage(0,16)
+
+  pixel_data, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
+  if err != nil {
+    panic(err.Error())
   }
-}
 
-func draw_rectangle(x,y uint8, color string) string {
-
-  // <rect id="svg_2" height="112" width="84" y="17" x="1" stroke-width="5" fill="rgb(0,150,150)"/>
-  // <rect id="svg_3" height="112" width="102" y="18" x="84" stroke-width="5" fill="#1500ff"/>
-
-  return ""
+  return pixel_array {
+    pixel_data: pixel_data.([]uint8),
+    w: int(w),
+    h: int(h),
+  }
 }
 
 func (px pixel_array) Write(dest string) (svg string, error error) {
@@ -58,6 +73,25 @@ func (px pixel_array) Write(dest string) (svg string, error error) {
   return
 }
 
+
+
+
+// Private Methods
+
+func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
+  h = wand.GetImageHeight()
+  w = wand.GetImageWidth()
+  return
+}
+
+func newPixelArray(pixel_data []uint8, w,h int) pixel_array {
+  return pixel_array {
+    pixel_data: pixel_data,
+    w: w,
+    h: h,
+  }
+}
+
 func write_file(contents string, dest string) {
 
   file, err := os.Create(dest)
@@ -71,6 +105,8 @@ func write_file(contents string, dest string) {
   w.Flush()
 
 }
+
+
 
 func gather_rgb_values(pixels []uint8) [][]int {
 
