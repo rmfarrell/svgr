@@ -23,17 +23,19 @@ func Write(pixel_data []uint8, width, height int) (svg string, error error) {
 
   fmt.Println(width, height)
 
+  i := 0
+
   // Iterate over rows
   for row := 0; row < height; row++ {
 
     // Iterate over columns
     for col := 0; col < width; col++ {
 
-      offset := row * col * 3
+      r:= pixel_data[i]
+      g:= pixel_data[i+1]
+      b:= pixel_data[i+2]
 
-      r:= pixel_data[offset]
-      g:= pixel_data[offset+1]
-      b:= pixel_data[offset+2]
+      i = i+3
       
       svg += fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", row*10, col*10, r, g, b)    
 
@@ -61,8 +63,24 @@ func write_file(contents string) {
 
 }
 
-func gather_rgb_values() {
+func gather_rgb_values(pixels []uint8) [][]int {
 
+  rgb_array := [][]int{}
+
+  for p := 0; p < len(pixels); p=p+3 {
+
+    // pa := make([]int, 3)
+
+    pa := []int{
+      int(pixels[p]),
+      int(pixels[p+1]),
+      int(pixels[p+2]),
+    }
+
+    rgb_array = append(rgb_array, pa) 
+  }
+
+  return rgb_array
 }
 
 func gather_green_values() {

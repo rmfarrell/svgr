@@ -19,7 +19,7 @@ const (
 func main() {
 
   // Open the image
-  reader, err := os.Open("src/img.jpg")
+  reader, err := os.Open("src/indian.jpg")
   if err != nil {
     panic(err.Error())
   }
@@ -36,7 +36,7 @@ func main() {
 
   w,h := get_dimensions(wand)
 
-  wand.AdaptiveResizeImage(w/10, h/10)
+  wand.AdaptiveResizeImage(w/20, h/20)
 
   w,h = get_dimensions(wand)
 
@@ -48,7 +48,7 @@ func main() {
     panic(err.Error())
   }
 
-  write_svg.Write(pixel_data.([]uint8),int(h),int(w))
+  write_svg.Write(pixel_data.([]uint8),int(w),int(h))
 }
 
 func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
