@@ -2,6 +2,7 @@ package write_svg
 
 import (
   "fmt"
+  // "reflect"
   "bufio"
   _ "image"
   "os"
@@ -13,6 +14,12 @@ type pixel_array struct {
   w          int
   h          int
 }
+
+type pixel_draw interface {
+  pixel() string
+}
+
+// Constructor
 
 func NewSvgr(img *os.File) pixel_array {
 
@@ -43,26 +50,39 @@ func NewSvgr(img *os.File) pixel_array {
   }
 }
 
-func (px pixel_array) Write(dest string) (svg string, error error) {
+// Class Methods
 
-  svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", px.w*10, px.h*10)
+func (px pixel_array) Squares(dest string) (svg string, error error) {
+
+  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+    return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
+  })
+  return
+}
+
+func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
+
+  svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", pxa.w*10, pxa.h*10)
 
   i := 0
 
   // Iterate over rows
-  for row := 0; row < px.h; row++ {
+  for row := 0; row < pxa.h; row++ {
 
     // Iterate over columns
-    for col := 0; col < px.w; col++ {
+    for col := 0; col < pxa.w; col++ {
 
-      r:= px.pixel_data[i]
-      g:= px.pixel_data[i+1]
-      b:= px.pixel_data[i+2]
+      svg += pixel_method(
+        []uint8{
+          pxa.pixel_data[i], 
+          pxa.pixel_data[i+1], 
+          pxa.pixel_data[i+2],
+        },
+        col,
+        row,
+      )
 
       i = i+3
-      
-      svg += fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", row*10, col*10, r, g, b)    
-
     }
   }
 
@@ -82,14 +102,6 @@ func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
   h = wand.GetImageHeight()
   w = wand.GetImageWidth()
   return
-}
-
-func newPixelArray(pixel_data []uint8, w,h int) pixel_array {
-  return pixel_array {
-    pixel_data: pixel_data,
-    w: w,
-    h: h,
-  }
 }
 
 func write_file(contents string, dest string) {

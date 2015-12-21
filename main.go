@@ -3,9 +3,7 @@ package main
 import (
   // "fmt"
   // "reflect"
-  // "log"
   "os"
-  // err "errors"
   svgr "./write_svg"
 )
 
@@ -25,5 +23,5 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  svgr.Write('./dest/test.svg')
+  svgr.Squares("./dest/test.svg")
 }
