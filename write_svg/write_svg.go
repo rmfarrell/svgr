@@ -78,10 +78,24 @@ func (px *pixel_array) Pixels() {
   return
 }
 
-func (px *pixel_array) MultiChannel() {
+func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale uint8, offset int) {
 
+  channel := 0
+  color   := ""
+
+  switch channelName {
+  case "red" :
+    channel = 0
+    color = "#f03c3c"
+  case "green" :
+    channel = 1
+    color = "#63f03c"
+  case "blue" :
+    channel = 2
+    color = "#3c9cf0"
+  }
   write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
+    return fmt.Sprintf("<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", rgb[channel]/scale, y*10+offset, x*10+offset, opacity, color)
   })
   return
 }
@@ -363,33 +377,3 @@ func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
   w = wand.GetImageWidth()
   return
 }
-
-// func gather_rgb_values(pixels []uint8) [][]int {
-
-//   rgb_array := [][]int{}
-
-//   for p := 0; p < len(pixels); p=p+3 {\
-
-//     pa := []int{
-//       int(pixels[p]),
-//       int(pixels[p+1]),
-//       int(pixels[p+2]),
-//     }
-
-//     rgb_array = append(rgb_array, pa) 
-//   }
-
-//   return rgb_array
-// }
-
-// func gather_green_values() {
-
-// }
-
-// func gather_red_values() {
-
-// }
-
-// func gather_blue_values() {
-
-// }
