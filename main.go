@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+  // "fmt"
   // "reflect"
   // "log"
   "os"
@@ -25,17 +25,5 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  fmt.Println(svgr)
+  svgr.Write('./dest/test.svg')
 }
-
-
-
-// func save_image() {
-
-//   // write the image
-//   toimg, err := os.Create("dessafdt/nesw.jpg")
-//   if err != nil {
-//     panic(err.Error())
-//   }
-//   defer toimg.Close()
-// }
