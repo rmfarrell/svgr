@@ -60,6 +60,15 @@ func (px pixel_array) Squares(dest string) (svg string, error error) {
   return
 }
 
+func (px pixel_array) Circles(dest string) (svg string, error error) {
+
+  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
+    // return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
+  })
+  return
+}
+
 func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
 
   svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", pxa.w*10, pxa.h*10)

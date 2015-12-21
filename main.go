@@ -23,5 +23,5 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  svgr.Squares("./dest/test.svg")
+  svgr.Circles("./dest/test.svg")
 }
