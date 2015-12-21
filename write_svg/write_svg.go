@@ -11,8 +11,9 @@ import (
 )
 
 const (
-  MaxSize             int       = 120
+  MaxSize             int       = 20
   AdaptiveSharpenVal  float64   = 16
+  Funkiness           int       = 6
 )
 
 type pixel_array struct {
@@ -94,20 +95,103 @@ func (px pixel_array) PolyGonSquare(name, dest string) (svg string, error error)
   return
 }
 
+func (px pixel_array) FunkyTriangles(name, dest string) (svg string, error error) {
+
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
+
+    x = x*10
+    y = y*10
+    g := [][]int{}
+    f := rand.Intn(Funkiness)
+
+    if x/10 % 2 == 0 {
+      
+      // Draw down-pointing triangle
+      g = [][]int {
+        []int {x-f,y-f/2},
+        []int {x+16,y},
+        []int {x+f,y+10},
+      }
+
+    } else {
+
+      // Draw up-pointing triangle
+      g = [][]int {
+        []int {x-4,y+10},
+        []int {x+16,y+10},
+        []int {x+6+f ,y+0},
+      }
+    }
+
+    return fmt.Sprintf(
+      "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+      g[0][0],
+      g[0][1],
+      g[1][0],
+      g[1][1],
+      g[2][0],
+      g[2][1],
+      rgb,
+    )
+  })
+  return
+}
+
+func (px pixel_array) Triangles(name, dest string) (svg string, error error) {
+
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
+
+    x = x*10
+    y = y*10
+    g := [][]int{}
+
+    if x/10 % 2 == 0 {
+      
+      // Draw down-pointing triangle
+      g = [][]int {
+        []int {x-4,y+0},
+        []int {x+16,y+0},
+        []int {x+6,y+10},
+      }
+
+    } else {
+
+      // Draw up-pointing triangle
+      g = [][]int {
+        []int {x-4,y+10},
+        []int {x+16,y+10},
+        []int {x+6,y+0},
+      }
+    }
+
+    return fmt.Sprintf(
+      "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+      g[0][0],
+      g[0][1],
+      g[1][0],
+      g[1][1],
+      g[2][0],
+      g[2][1],
+      rgb,
+    )
+  })
+  return
+}
+
 func (px pixel_array) FunkySquares(name, dest string) (svg string, error error) {
 
   svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
 
-    z := rand.Intn(6)
+    f := rand.Intn(Funkiness)
 
     x = x*10
     y = y*10
 
     g := [][]int {
-      []int {x+z/2,y-z},
-      []int {x+10,y-z},
-      []int {x+10-z,y+10},
-      []int {x-z,y+10},
+      []int {x+f/2,y-f},
+      []int {x+10,y-f},
+      []int {x+10-f,y+10},
+      []int {x-f,y+10},
     }
 
     return fmt.Sprintf(
