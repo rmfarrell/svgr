@@ -48,25 +48,25 @@ func NewSvgr(img *os.File) pixel_array {
 
 // Class Methods
 
-func (px pixel_array) Pixels(dest string) (svg string, error error) {
+func (px pixel_array) Pixels(name, dest string) (svg string, error error) {
 
-  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
     return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
   })
   return
 }
 
-func (px pixel_array) Dots(dest string) (svg string, error error) {
+func (px pixel_array) Dots(name, dest string) (svg string, error error) {
 
-  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
     return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
   })
   return
 }
 
-func (px pixel_array) PolyGonSquare(dest string) (svg string, error error) {
+func (px pixel_array) PolyGonSquare(name, dest string) (svg string, error error) {
 
-  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
 
     x = x*10
     y = y*10
@@ -94,9 +94,9 @@ func (px pixel_array) PolyGonSquare(dest string) (svg string, error error) {
   return
 }
 
-func (px pixel_array) FunkySquares(dest string) (svg string, error error) {
+func (px pixel_array) FunkySquares(name, dest string) (svg string, error error) {
 
-  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
 
     z := rand.Intn(6)
 
@@ -127,9 +127,9 @@ func (px pixel_array) FunkySquares(dest string) (svg string, error error) {
 }
 
 
-func (px pixel_array) Hexagons(dest string) (svg string, error error) {
+func (px pixel_array) Hexagons(name, dest string) (svg string, error error) {
 
-  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
 
     z := 0
 
@@ -171,7 +171,7 @@ func (px pixel_array) Hexagons(dest string) (svg string, error error) {
   return
 }
 
-func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
+func write(pxa pixel_array, name, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
 
   svg = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\"><g>", pxa.w*10, pxa.h*10)
 
@@ -199,7 +199,7 @@ func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) st
 
   svg += "</g></svg>"
 
-  write_file(svg, dest)
+  write_file(svg, name, dest)
 
   return
 }
@@ -234,9 +234,9 @@ func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
   return
 }
 
-func write_file(contents string, dest string) {
+func write_file(contents, name, dest string) {
 
-  file, err := os.Create(dest)
+  file, err := os.Create(dest + "/" + name + ".svg")
   if err != nil {
     panic(err)
   }
@@ -245,7 +245,6 @@ func write_file(contents string, dest string) {
   w:= bufio.NewWriter(file)
   w.WriteString(contents)
   w.Flush()
-
 }
 
 // func gather_rgb_values(pixels []uint8) [][]int {

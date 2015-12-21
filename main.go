@@ -23,5 +23,10 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  svgr.FunkySquares("./dest/test.svg")
+  name := "steve_harvey"
+
+  svgr.Dots(name + "_dots", "./dest")
+  svgr.Pixels(name + "_pixels", "./dest")
+  svgr.FunkySquares(name + "_funky_squares", "./dest")
+  svgr.Hexagons(name + "_hexagons", "./dest")
 }
