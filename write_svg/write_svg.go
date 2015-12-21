@@ -7,16 +7,18 @@ import (
   _ "image"
   "os"
   "github.com/gographics/imagick/imagick"
+  "math/rand"
+)
+
+const (
+  MaxSize             int       = 120
+  AdaptiveSharpenVal  float64   = 16
 )
 
 type pixel_array struct {
   pixel_data []uint8
   w          int
   h          int
-}
-
-type pixel_draw interface {
-  pixel() string
 }
 
 // Constructor
@@ -30,13 +32,7 @@ func NewSvgr(img *os.File) pixel_array {
 
   wand.ReadImageFile(img)
 
-  w,h := get_dimensions(wand)
-
-  wand.AdaptiveResizeImage(w/20, h/20)
-
-  w,h = get_dimensions(wand)
-
-  wand.AdaptiveSharpenImage(0,16)
+  w,h := shrink_image(wand)
 
   pixel_data, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
   if err != nil {
@@ -98,6 +94,38 @@ func (px pixel_array) PolyGonSquare(dest string) (svg string, error error) {
   return
 }
 
+func (px pixel_array) FunkySquares(dest string) (svg string, error error) {
+
+  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+
+    z := rand.Intn(6)
+
+    x = x*10
+    y = y*10
+
+    g := [][]int {
+      []int {x+z/2,y-z},
+      []int {x+10,y-z},
+      []int {x+10-z,y+10},
+      []int {x-z,y+10},
+    }
+
+    return fmt.Sprintf(
+      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+      g[0][0],
+      g[0][1],
+      g[1][0],
+      g[1][1],
+      g[2][0],
+      g[2][1],
+      g[3][0],
+      g[2][1],
+      rgb,
+    )
+  })
+  return
+}
+
 
 func (px pixel_array) Hexagons(dest string) (svg string, error error) {
 
@@ -141,7 +169,7 @@ func (px pixel_array) Hexagons(dest string) (svg string, error error) {
     )
   })
   return
-} 
+}
 
 func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
 
@@ -176,10 +204,29 @@ func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) st
   return
 }
 
+func shrink_image(wand *imagick.MagickWand) (w,h uint) {
 
+  w,h = get_dimensions(wand)
 
+  shrinkBy := 1
 
-// Private Methods
+  if w >= h {
+    shrinkBy = int(w)/MaxSize
+  } else {
+    shrinkBy = int(h)/MaxSize
+  }
+
+  wand.AdaptiveResizeImage(
+    uint(int(w)/shrinkBy), 
+    uint(int(h)/shrinkBy),
+  )
+
+  wand.AdaptiveSharpenImage(0,AdaptiveSharpenVal)
+
+  w,h = get_dimensions(wand)
+
+  return
+}
 
 func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
   h = wand.GetImageHeight()
@@ -201,36 +248,32 @@ func write_file(contents string, dest string) {
 
 }
 
+// func gather_rgb_values(pixels []uint8) [][]int {
 
+//   rgb_array := [][]int{}
 
-func gather_rgb_values(pixels []uint8) [][]int {
+//   for p := 0; p < len(pixels); p=p+3 {\
 
-  rgb_array := [][]int{}
+//     pa := []int{
+//       int(pixels[p]),
+//       int(pixels[p+1]),
+//       int(pixels[p+2]),
+//     }
 
-  for p := 0; p < len(pixels); p=p+3 {
+//     rgb_array = append(rgb_array, pa) 
+//   }
 
-    // pa := make([]int, 3)
+//   return rgb_array
+// }
 
-    pa := []int{
-      int(pixels[p]),
-      int(pixels[p+1]),
-      int(pixels[p+2]),
-    }
+// func gather_green_values() {
 
-    rgb_array = append(rgb_array, pa) 
-  }
+// }
 
-  return rgb_array
-}
+// func gather_red_values() {
 
-func gather_green_values() {
+// }
 
-}
+// func gather_blue_values() {
 
-func gather_red_values() {
-
-}
-
-func gather_blue_values() {
-
-}
+// }

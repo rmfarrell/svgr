@@ -15,7 +15,7 @@ const (
 func main() {
 
   // Open the image
-  reader, err := os.Open("src/indian.jpg")
+  reader, err := os.Open("src/img.jpg")
   if err != nil {
     panic(err.Error())
   }
@@ -23,5 +23,5 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  svgr.Hexagons("./dest/test.svg")
+  svgr.FunkySquares("./dest/test.svg")
 }
