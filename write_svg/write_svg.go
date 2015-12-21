@@ -52,22 +52,96 @@ func NewSvgr(img *os.File) pixel_array {
 
 // Class Methods
 
-func (px pixel_array) Squares(dest string) (svg string, error error) {
+func (px pixel_array) Pixels(dest string) (svg string, error error) {
 
   svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
+    return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
   })
   return
 }
 
-func (px pixel_array) Circles(dest string) (svg string, error error) {
+func (px pixel_array) Dots(dest string) (svg string, error error) {
 
   svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
-    // return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"rgb(%d,%d,%d)\"/>", y*10, x*10, rgb[0], rgb[1], rgb[2])
+    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
   })
   return
 }
+
+func (px pixel_array) PolyGonSquare(dest string) (svg string, error error) {
+
+  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+
+    x = x*10
+    y = y*10
+
+    g := [][]int {
+      []int {x+0,y+0},
+      []int {x+10,y+0},
+      []int {x+10,y+10},
+      []int {x+0,y+10},
+    }
+
+    return fmt.Sprintf(
+      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+      g[0][0],
+      g[0][1],
+      g[1][0],
+      g[1][1],
+      g[2][0],
+      g[2][1],
+      g[3][0],
+      g[2][1],
+      rgb,
+    )
+  })
+  return
+}
+
+
+func (px pixel_array) Hexagons(dest string) (svg string, error error) {
+
+  svg, error = write(px, dest, func(rgb []uint8, x,y int) string {
+
+    z := 0
+
+    if x % 2 == 0 {
+      z = 5
+    } else {
+      z = 0
+    }
+
+    x = x*10
+    y = y*10
+
+    g := [][]int {
+      []int {x+0,y+5+z},
+      []int {x+5,y+0+z},
+      []int {x+10,y+0+z},
+      []int {x+15,y+5+z},
+      []int {x+10,y+10+z},
+      []int {x+5,y+10+z},
+    }
+
+    return fmt.Sprintf(
+      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+      g[0][0],
+      g[0][1],
+      g[1][0],
+      g[1][1],
+      g[2][0],
+      g[2][1],
+      g[3][0],
+      g[3][1],
+      g[4][0],
+      g[4][1],
+      g[5][0],
+      g[5][1],
+      rgb,
+    )
+  })
+  return
+} 
 
 func write(pxa pixel_array, dest string, pixel_method func([]uint8, int, int) string) (svg string, error error) {
 

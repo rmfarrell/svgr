@@ -23,5 +23,5 @@ func main() {
 
   svgr := svgr.NewSvgr(reader)
 
-  svgr.Circles("./dest/test.svg")
+  svgr.Hexagons("./dest/test.svg")
 }
