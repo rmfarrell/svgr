@@ -11,7 +11,7 @@ import (
 )
 
 const (
-  MaxSize             int       = 20
+  MaxSize             int       = 80
   AdaptiveSharpenVal  float64   = 16
   Funkiness           int       = 6
 )
