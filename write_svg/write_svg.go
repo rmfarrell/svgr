@@ -11,9 +11,8 @@ import (
 )
 
 const (
-  MaxSize             int       = 80
   AdaptiveSharpenVal  float64   = 16
-  Funkiness           int       = 6
+  Funkiness           int       = 3
 )
 
 type pixel_array struct {
@@ -24,7 +23,7 @@ type pixel_array struct {
 
 // Constructor
 
-func NewSvgr(img *os.File) pixel_array {
+func NewSvgr(img *os.File, maxSize int) pixel_array {
 
   imagick.Initialize()
   defer imagick.Terminate()
@@ -33,7 +32,7 @@ func NewSvgr(img *os.File) pixel_array {
 
   wand.ReadImageFile(img)
 
-  w,h := shrink_image(wand)
+  w,h := shrink_image(wand, maxSize)
 
   pixel_data, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
   if err != nil {
@@ -57,6 +56,14 @@ func (px pixel_array) Pixels(name, dest string) (svg string, error error) {
   return
 }
 
+func (px pixel_array) MultiChannel(name, dest string) (svg string, error error) {
+
+  svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
+    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
+  })
+  return
+}
+
 func (px pixel_array) Dots(name, dest string) (svg string, error error) {
 
   svg, error = write(px, name, dest, func(rgb []uint8, x,y int) string {
@@ -73,10 +80,10 @@ func (px pixel_array) PolyGonSquare(name, dest string) (svg string, error error)
     y = y*10
 
     g := [][]int {
-      []int {x+0,y+0},
-      []int {x+10,y+0},
+      []int {x,y},
+      []int {x+10,y},
       []int {x+10,y+10},
-      []int {x+0,y+10},
+      []int {x,y+10},
     }
 
     return fmt.Sprintf(
@@ -108,9 +115,9 @@ func (px pixel_array) FunkyTriangles(name, dest string) (svg string, error error
       
       // Draw down-pointing triangle
       g = [][]int {
-        []int {x-f,y-f/2},
-        []int {x+16,y},
-        []int {x+f,y+10},
+        []int {x-f/2,y-f/2},
+        []int {x+16,y-f/2},
+        []int {x+5+f,y+10},
       }
 
     } else {
@@ -288,16 +295,16 @@ func write(pxa pixel_array, name, dest string, pixel_method func([]uint8, int, i
   return
 }
 
-func shrink_image(wand *imagick.MagickWand) (w,h uint) {
+func shrink_image(wand *imagick.MagickWand, maxSize int) (w,h uint) {
 
   w,h = get_dimensions(wand)
 
   shrinkBy := 1
 
   if w >= h {
-    shrinkBy = int(w)/MaxSize
+    shrinkBy = int(w)/maxSize
   } else {
-    shrinkBy = int(h)/MaxSize
+    shrinkBy = int(h)/maxSize
   }
 
   wand.AdaptiveResizeImage(

@@ -21,11 +21,12 @@ func main() {
   }
   defer reader.Close()
 
-  svgr := svgr.NewSvgr(reader)
+  svgr := svgr.NewSvgr(reader, 80)
 
   name := "steve_harvey"
   dest := "./dest"
 
+  svgr.MultiChannel(name + "_multichannel", dest)
   svgr.FunkyTriangles(name + "_funky_triangles", dest)
   svgr.Triangles(name + "_triangles", dest)
   svgr.Dots(name + "_dots", dest)
