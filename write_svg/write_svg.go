@@ -78,10 +78,11 @@ func (px *pixel_array) Pixels() {
   return
 }
 
-func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale uint8, offset int) {
+func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale uint8, offset int, negative bool) {
 
-  channel := 0
-  color   := ""
+  channel      := 0
+  color        := ""
+  color_offset := uint8(0)
 
   switch channelName {
   case "red" :
@@ -94,8 +95,22 @@ func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale 
     channel = 2
     color = "#3c9cf0"
   }
+
+  if negative {
+    color_offset = 0
+  } else {
+    color_offset = 255
+  }
+
   write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", rgb[channel]/scale, y*10+offset, x*10+offset, opacity, color)
+    return fmt.Sprintf(
+      "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", 
+      (color_offset-rgb[channel])/scale, 
+      y*10+offset, 
+      x*10+offset, 
+      opacity, 
+      color,
+    )
   })
   return
 }
