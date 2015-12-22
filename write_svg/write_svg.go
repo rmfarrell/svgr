@@ -78,22 +78,18 @@ func (px *pixel_array) Pixels() {
   return
 }
 
-func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale uint8, offset int, negative bool) {
+func (px *pixel_array) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool) {
 
   channel      := 0
-  color        := ""
   color_offset := uint8(0)
 
   switch channelName {
   case "red" :
     channel = 0
-    color = "#f03c3c"
   case "green" :
     channel = 1
-    color = "#63f03c"
   case "blue" :
     channel = 2
-    color = "#3c9cf0"
   }
 
   if negative {
@@ -109,7 +105,7 @@ func (px *pixel_array) SingleChannel(channelName string, opacity float64, scale 
       y*10+offset, 
       x*10+offset, 
       opacity, 
-      color,
+      hex,
     )
   })
   return

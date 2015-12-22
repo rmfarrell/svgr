@@ -22,9 +22,16 @@ func main() {
   defer reader.Close()
 
   svgr := svgr.NewSvgr(reader, 60, "steve_harvey")
-  svgr.SingleChannel("blue", .7, 35, -8, false)
-  svgr.SingleChannel("red", .6, 50, 0, false)
-  svgr.SingleChannel("green", .4, 50, 6, false)
+  svgr.SingleChannel(
+    "blue",
+    "#3c9cf0", //color value
+    .7,        //opacity
+    35,        //scale
+    -8,        //offset
+    false,     //negative
+  )
+  svgr.SingleChannel("red", "#f03c3c", .6, 50, 0, false)
+  svgr.SingleChannel("green", "#63f03c", .4, 50, 6, false)
   svgr.Save(dest + svgr.GetName() + "_multichannel.svg")
   svgr.Reset()
 
