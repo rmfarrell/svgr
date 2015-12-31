@@ -92,7 +92,7 @@ func (px *pixel_array) Reset() {
 func (px *pixel_array) Pixels() {
 
   write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<rect height=\"10\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
+    return fmt.Sprintf("<rect height=\"10\" data-anim=\".8,.9,.5\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
   })
   return
 }
