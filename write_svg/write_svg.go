@@ -28,7 +28,6 @@ type pixel_array struct {
 }
 
 // Constructor
-
 func NewSvgr(img *os.File, maxSize int, name string) pixel_array {
 
   imagick.Initialize()
@@ -105,7 +104,7 @@ func (px *pixel_array) SingleChannel(channelName, color string, opacity float64,
       y*10+offset, 
       x*10+offset, 
       opacity, 
-      hex,
+      color,
     )
   })
   return

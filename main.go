@@ -1,10 +1,14 @@
 package main
 
 import (
-  // "fmt"
+  "fmt"
   // "reflect"
   "os"
-  svgr "./write_svg"
+  "os/exec"
+  "github.com/gographics/imagick/imagick"
+  "github.com/satori/go.uuid"
+  "io/ioutil"
+  // svgr "./write_svg"
 )
 
 const (
@@ -15,11 +19,18 @@ const (
 func main() {
 
   // Open the image
-  reader, err := os.Open("src/baby.png")
-  if err != nil {
+  reader := readFile("./src/animated.gif")
+
+  // Store each file in memory so we get access to each frame of the animated gif
+  imgFiles, imgPath := separateAnimatedGif(reader)
+
+  // Delete the directory once we have stored the image files in memory
+  if err := os.RemoveAll(imgPath); err != nil {
     panic(err.Error())
   }
-  defer reader.Close()
+
+
+  /*
 
   svgr := svgr.NewSvgr(reader, 60, "steve_harvey")
   svgr.SingleChannel(
@@ -58,4 +69,54 @@ func main() {
   svgr.Hexagons()
   svgr.Save(dest + svgr.GetName() + "_hexagons.svg")
   svgr.Reset()
+  */
+}
+
+/*
+* Utities
+*/
+
+func separateAnimatedGif(animated *os.File) (imageFiles []*os.File, dir string) {
+
+  // Generate a uid and make a directory with corresponding name
+  dir = fmt.Sprintf("./%s", uuid.NewV4())
+  if err := os.Mkdir(dir, 0777); err != nil {
+    panic(err.Error())
+  }
+
+  // Separate and coalesce each frame of the animation into the new folder
+  cmd := exec.Command(
+    "convert", 
+    "-coalesce", 
+    animated.Name(), 
+    fmt.Sprintf("./%s/image_%%d.gif", dir),
+  )
+  cmd.Run()
+
+  // Save a reference to each file in the directory
+  files, _ := ioutil.ReadDir(dir)
+  for _, f := range files {
+    rf := readFile(dir + "/" + f.Name())
+    imageFiles = append(imageFiles, rf)
+  }
+
+  return
+}
+
+func readFile(file string) *os.File {
+  reader, err := os.Open(file)
+  if err != nil {
+    panic(err.Error())
+  }
+  defer reader.Close()
+  return reader
+}
+
+func _createImageSeqence(file *os.File) {
+
+  wand := imagick.NewMagickWand()
+
+  wand.ReadImageFile(file)
+
+  fmt.Println(wand)
 }
