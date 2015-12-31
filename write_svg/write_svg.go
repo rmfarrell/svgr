@@ -7,7 +7,7 @@ import (
   _ "image"
   "os"
   "github.com/gographics/imagick/imagick"
-  "math/rand"
+  // "math/rand"
 )
 
 const (
@@ -21,31 +21,50 @@ type svg_content struct {
 
 type pixel_array struct {
   svg_content
-  pixel_data  []uint8
+  pixel_data  [][]uint8
   w           int
   h           int
   name        string
 }
 
 // Constructor
-func NewSvgr(img *os.File, maxSize int, name string) pixel_array {
+func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixel_array {
 
   imagick.Initialize()
   defer imagick.Terminate()
 
+  var (
+    w           uint
+    h           uint
+    pixel_data  [][]uint8
+  )
+
+  for _, i := range imageFiles {
+
+    wand := imagick.NewMagickWand()
+
+    if err := wand.ReadImageBlob(i); err != nil {
+      panic(err.Error())
+    }
+
+    w,h = shrink_image(wand, maxSize)
+
+    px, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
+    if err != nil {
+      panic(err.Error())
+    }
+    pixel_data = append(pixel_data, px.([]uint8))
+  }
+  /*
   wand := imagick.NewMagickWand()
 
   wand.ReadImageFile(img)
 
   w,h := shrink_image(wand, maxSize)
-
-  pixel_data, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
-  if err != nil {
-    panic(err.Error())
-  }
+  */
 
   return pixel_array {
-    pixel_data: pixel_data.([]uint8),
+    pixel_data: pixel_data,
     w:          int(w),
     h:          int(h),
     name:       name,
@@ -67,7 +86,8 @@ func (px *pixel_array) Reset() {
   px.svg_content.g = ""
 }
 
-// Class Methods
+// Public Methods
+
 
 func (px *pixel_array) Pixels() {
 
@@ -77,6 +97,7 @@ func (px *pixel_array) Pixels() {
   return
 }
 
+/*
 func (px *pixel_array) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool) {
 
   channel      := 0
@@ -307,6 +328,8 @@ func (px *pixel_array) Hexagons() (svg string, error error) {
   })
   return
 }
+*/
+
 
 func (pxa *pixel_array) Save(dest string) {
 
@@ -339,9 +362,9 @@ func write(pxa *pixel_array, pixel_method func([]uint8, int, int) string) {
 
       pxa.svg_content.g += pixel_method(
         []uint8{
-          pxa.pixel_data[i], 
-          pxa.pixel_data[i+1], 
-          pxa.pixel_data[i+2],
+          pxa.pixel_data[0][i], 
+          pxa.pixel_data[0][i+1], 
+          pxa.pixel_data[0][i+2],
         },
         col,
         row,

@@ -8,7 +8,7 @@ import (
   "github.com/gographics/imagick/imagick"
   "github.com/satori/go.uuid"
   "io/ioutil"
-  // svgr "./write_svg"
+  svgr "./write_svg"
 )
 
 const (
@@ -29,6 +29,10 @@ func main() {
     panic(err.Error())
   }
 
+  svg := svgr.NewSvgr(imgFiles, 60, "my_svg")
+
+  svg.Pixels()
+  svg.Save(dest + svg.GetName() + "pixels.svg")
 
   /*
 
@@ -72,14 +76,20 @@ func main() {
   */
 }
 
+
+
 /*
 * Utities
 */
 
-func separateAnimatedGif(animated *os.File) (imageFiles []*os.File, dir string) {
+func videoToAnimatedGif(video *os.File) *os.File {
+  return video
+}
 
-  // Generate a uid and make a directory with corresponding name
-  dir = fmt.Sprintf("./%s", uuid.NewV4())
+func separateAnimatedGif(animated *os.File) (imageFiles [][]byte, dir string) {
+
+  // Generate a UUID and make a directory with corresponding name
+  dir = fmt.Sprintf("./_%s", uuid.NewV4())
   if err := os.Mkdir(dir, 0777); err != nil {
     panic(err.Error())
   }
@@ -96,7 +106,7 @@ func separateAnimatedGif(animated *os.File) (imageFiles []*os.File, dir string) 
   // Save a reference to each file in the directory
   files, _ := ioutil.ReadDir(dir)
   for _, f := range files {
-    rf := readFile(dir + "/" + f.Name())
+    rf, _ := ioutil.ReadFile(dir + "/" + f.Name())
     imageFiles = append(imageFiles, rf)
   }
 
