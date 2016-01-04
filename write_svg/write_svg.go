@@ -377,7 +377,7 @@ func (pxa *pixelArray) Save(dest string) {
 
   fmt.Printf("Saving %s.svg...", pxa.GetName(),)
 
-  file, err := os.Create(dest)
+  file, err := os.Create(dest + ".svg")
   if err != nil {
     panic(err)
   }
