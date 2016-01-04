@@ -19,7 +19,7 @@ const (
 func main() {
 
   // Open the image
-  reader := readFile("./src/animated.gif")
+  reader := readFile("./src/lemmy_guitar.gif")
 
   // Store each file in memory so we get access to each frame of the animated gif
   imgFiles, imgPath := separateAnimatedGif(reader)
@@ -29,54 +29,18 @@ func main() {
     panic(err.Error())
   }
 
-  svg := svgr.NewSvgr(imgFiles, 60, "my_svg")
+  lwf := svgr.NewSvgr(imgFiles, 80, "lemmy_guitar")
 
-  svg.Pixels()
-  svg.Save(dest + svg.GetName() + "pixels.svg")
+  // for x:=0; x < len(imgFiles); x++ {
+  //   lwf.SingleChannel("red", "#f03c3c", .6, 50, 0, false, x)
+  //   lwf.SingleChannel("blue", "#3c9cf0", .6, 50, -8, false, x)
+  //   lwf.SingleChannel("green", "#63f03c", .4, 50, 6, false, x)
+  // }
 
-  /*
+  lwf.FunkyTriangles()
 
-  svgr := svgr.NewSvgr(reader, 60, "steve_harvey")
-  svgr.SingleChannel(
-    "blue",
-    "#3c9cf0", //color value
-    .7,        //opacity
-    35,        //scale
-    -8,        //offset
-    false,     //negative
-  )
-  svgr.SingleChannel("red", "#f03c3c", .6, 50, 0, false)
-  svgr.SingleChannel("green", "#63f03c", .4, 50, 6, false)
-  svgr.Save(dest + svgr.GetName() + "_multichannel.svg")
-  svgr.Reset()
-
-  svgr.FunkyTriangles()
-  svgr.Save(dest + svgr.GetName() + "_funky_triangles.svg")
-  svgr.Reset()
-
-  svgr.Triangles()
-  svgr.Save(dest + svgr.GetName() + "_triangles.svg")
-  svgr.Reset()
-
-  svgr.Dots()
-  svgr.Save(dest + svgr.GetName() + "_dots.svg")
-  svgr.Reset()
-
-  svgr.Pixels()
-  svgr.Save(dest + svgr.GetName() + "_pixels.svg")
-  svgr.Reset()
-
-  svgr.FunkySquares()
-  svgr.Save(dest + svgr.GetName() + "_funky_squares.svg")
-  svgr.Reset()
-
-  svgr.Hexagons()
-  svgr.Save(dest + svgr.GetName() + "_hexagons.svg")
-  svgr.Reset()
-  */
+  lwf.Save(dest + lwf.GetName() + ".svg")
 }
-
-
 
 /*
 * Utities
@@ -99,7 +63,7 @@ func separateAnimatedGif(animated *os.File) (imageFiles [][]byte, dir string) {
     "convert", 
     "-coalesce", 
     animated.Name(), 
-    fmt.Sprintf("./%s/image_%%d.gif", dir),
+    fmt.Sprintf("./%s/image_%%03d.gif", dir),
   )
   cmd.Run()
 

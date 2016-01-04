@@ -2,12 +2,11 @@ package write_svg
 
 import (
   "fmt"
-  // "reflect"
   "bufio"
   _ "image"
   "os"
   "github.com/gographics/imagick/imagick"
-  // "math/rand"
+  "math/rand"
 )
 
 const (
@@ -55,20 +54,19 @@ func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixel_array {
     }
     pixel_data = append(pixel_data, px.([]uint8))
   }
-  /*
-  wand := imagick.NewMagickWand()
-
-  wand.ReadImageFile(img)
-
-  w,h := shrink_image(wand, maxSize)
-  */
 
   return pixel_array {
-    pixel_data: pixel_data,
-    w:          int(w),
-    h:          int(h),
-    name:       name,
+    svg_content:  writeContainer(w,h),
+    pixel_data:   pixel_data,
+    w:            int(w),
+    h:            int(h),
+    name:         name,
   }
+}
+
+func (px pixel_array) GetSize() int {
+
+  return len(px.pixel_data)
 }
 
 func (px pixel_array) GetName() string {
@@ -86,19 +84,229 @@ func (px *pixel_array) Reset() {
   px.svg_content.g = ""
 }
 
-// Public Methods
+/*
+* Public Methods
+*/
 
-
-func (px *pixel_array) Pixels() {
-
-  write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<rect height=\"10\" data-anim=\".8,.9,.5\" width=\"10\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
-  })
+// If no frames are passed, return an array of all frames. Otherwise, do nothing
+func normalizeFramesArray(framesIn []int, framesLength int) (framesOut []int) {
+  if len(framesIn) >= 1 {
+    framesOut = framesIn
+  } else {
+    for f:=0; f < framesLength; f++ {
+      framesOut = append(framesOut, f)
+    }
+  }
   return
 }
 
-/*
-func (px *pixel_array) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool) {
+func (px *pixel_array) Pixels(frames ...int) {
+  // TODO: error/recover from pushing frames that exceed size of pixel_array
+
+  frames = normalizeFramesArray(frames, px.GetSize())
+
+  for _, frame := range frames {
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+      return fmt.Sprintf(
+        "<rect height=\"10px\" width=\"10px\" y=\"%d\" x=\"%d\" fill=\"#%x\"/>",
+        y*10, 
+        x*10, 
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) Dots(frames ...int) {
+
+  frames = normalizeFramesArray(frames, px.GetSize())
+
+  for _, frame := range frames {
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+      return fmt.Sprintf(
+        "<circle r=\"5px\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>",
+        y*10,
+        x*10, 
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) Triangles(frames ...int) (svg string, error error) {
+
+  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+
+      x = x*10
+      y = y*10
+      g := [][]int{}
+
+      if x/10 % 2 == 0 {
+        
+        // Draw down-pointing triangle
+        g = [][]int {
+          []int {x-4,y+0},
+          []int {x+16,y+0},
+          []int {x+6,y+10},
+        }
+
+      } else {
+
+        // Draw up-pointing triangle
+        g = [][]int {
+          []int {x-4,y+10},
+          []int {x+16,y+10},
+          []int {x+6,y+0},
+        }
+      }
+
+      return fmt.Sprintf(
+        "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+        g[0][0],
+        g[0][1],
+        g[1][0],
+        g[1][1],
+        g[2][0],
+        g[2][1],
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) FunkyTriangles(frames ...int) (svg string, error error) {
+
+  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+
+      x = x*10
+      y = y*10
+      g := [][]int{}
+      f := rand.Intn(Funkiness)
+
+      if x/10 % 2 == 0 {
+        
+        // Draw down-pointing triangle
+        g = [][]int {
+          []int {x-f,y+f},
+          []int {x+16,y},
+          []int {x+5+f,y+8+f},
+        }
+
+      } else {
+
+        // Draw up-pointing triangle
+        g = [][]int {
+          []int {x-4,y+10+f},
+          []int {x+16,y+10+f},
+          []int {x+6+f ,y+0},
+        }
+      }
+
+      return fmt.Sprintf(
+        "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+        g[0][0],
+        g[0][1],
+        g[1][0],
+        g[1][1],
+        g[2][0],
+        g[2][1],
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) FunkySquares(frames ...int) (svg string, error error) {
+
+  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+
+      f := rand.Intn(Funkiness)
+
+      x = x*10
+      y = y*10
+
+      g := [][]int {
+        []int {x+f/2,y-f},
+        []int {x+10,y-f},
+        []int {x+10-f,y+10},
+        []int {x-f,y+10},
+      }
+
+      return fmt.Sprintf(
+        "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+        g[0][0],
+        g[0][1],
+        g[1][0],
+        g[1][1],
+        g[2][0],
+        g[2][1],
+        g[3][0],
+        g[2][1],
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) Hexagons(frames ...int) (svg string, error error) {
+
+  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+
+      z := 0
+
+      if x % 2 == 0 {
+        z = 5
+      } else {
+        z = 0
+      }
+
+      x = x*10
+      y = y*10
+
+      g := [][]int {
+        []int {x+0,y+5+z},
+        []int {x+5,y+0+z},
+        []int {x+10,y+0+z},
+        []int {x+15,y+5+z},
+        []int {x+10,y+10+z},
+        []int {x+5,y+10+z},
+      }
+
+      return fmt.Sprintf(
+        "<polygon points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
+        g[0][0],
+        g[0][1],
+        g[1][0],
+        g[1][1],
+        g[2][0],
+        g[2][1],
+        g[3][0],
+        g[3][1],
+        g[4][0],
+        g[4][1],
+        g[5][0],
+        g[5][1],
+        rgb,
+      )
+    })
+  }
+  return
+}
+
+func (px *pixel_array) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool, frames ...int) {
 
   channel      := 0
   color_offset := uint8(0)
@@ -118,218 +326,22 @@ func (px *pixel_array) SingleChannel(channelName, color string, opacity float64,
     color_offset = 255
   }
 
-  write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf(
-      "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", 
-      (color_offset-rgb[channel])/scale, 
-      y*10+offset, 
-      x*10+offset, 
-      opacity, 
-      color,
-    )
-  })
+
+  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+
+    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+      return fmt.Sprintf(
+        "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", 
+        (color_offset-rgb[channel])/scale, 
+        y*10+offset, 
+        x*10+offset, 
+        opacity, 
+        color,
+      )
+    })
+  }
   return
 }
-
-func (px *pixel_array) Dots() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-    return fmt.Sprintf("<circle r=\"5\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>", y*10, x*10, rgb)
-  })
-  return
-}
-
-func (px *pixel_array) PolyGonSquare() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-
-    x = x*10
-    y = y*10
-
-    g := [][]int {
-      []int {x,y},
-      []int {x+10,y},
-      []int {x+10,y+10},
-      []int {x,y+10},
-    }
-
-    return fmt.Sprintf(
-      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-      g[0][0],
-      g[0][1],
-      g[1][0],
-      g[1][1],
-      g[2][0],
-      g[2][1],
-      g[3][0],
-      g[2][1],
-      rgb,
-    )
-  })
-  return
-}
-
-func (px *pixel_array) FunkyTriangles() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-
-    x = x*10
-    y = y*10
-    g := [][]int{}
-    f := rand.Intn(Funkiness)
-
-    if x/10 % 2 == 0 {
-      
-      // Draw down-pointing triangle
-      g = [][]int {
-        []int {x-f,y+f},
-        []int {x+16,y},
-        []int {x+5+f,y+8+f},
-      }
-
-    } else {
-
-      // Draw up-pointing triangle
-      g = [][]int {
-        []int {x-4,y+10+f},
-        []int {x+16,y+10+f},
-        []int {x+6+f ,y+0},
-      }
-    }
-
-    return fmt.Sprintf(
-      "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-      g[0][0],
-      g[0][1],
-      g[1][0],
-      g[1][1],
-      g[2][0],
-      g[2][1],
-      rgb,
-    )
-  })
-  return
-}
-
-func (px *pixel_array) Triangles() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-
-    x = x*10
-    y = y*10
-    g := [][]int{}
-
-    if x/10 % 2 == 0 {
-      
-      // Draw down-pointing triangle
-      g = [][]int {
-        []int {x-4,y+0},
-        []int {x+16,y+0},
-        []int {x+6,y+10},
-      }
-
-    } else {
-
-      // Draw up-pointing triangle
-      g = [][]int {
-        []int {x-4,y+10},
-        []int {x+16,y+10},
-        []int {x+6,y+0},
-      }
-    }
-
-    return fmt.Sprintf(
-      "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-      g[0][0],
-      g[0][1],
-      g[1][0],
-      g[1][1],
-      g[2][0],
-      g[2][1],
-      rgb,
-    )
-  })
-  return
-}
-
-func (px *pixel_array) FunkySquares() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-
-    f := rand.Intn(Funkiness)
-
-    x = x*10
-    y = y*10
-
-    g := [][]int {
-      []int {x+f/2,y-f},
-      []int {x+10,y-f},
-      []int {x+10-f,y+10},
-      []int {x-f,y+10},
-    }
-
-    return fmt.Sprintf(
-      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-      g[0][0],
-      g[0][1],
-      g[1][0],
-      g[1][1],
-      g[2][0],
-      g[2][1],
-      g[3][0],
-      g[2][1],
-      rgb,
-    )
-  })
-  return
-}
-
-
-func (px *pixel_array) Hexagons() (svg string, error error) {
-
-  write(px, func(rgb []uint8, x,y int) string {
-
-    z := 0
-
-    if x % 2 == 0 {
-      z = 5
-    } else {
-      z = 0
-    }
-
-    x = x*10
-    y = y*10
-
-    g := [][]int {
-      []int {x+0,y+5+z},
-      []int {x+5,y+0+z},
-      []int {x+10,y+0+z},
-      []int {x+15,y+5+z},
-      []int {x+10,y+10+z},
-      []int {x+5,y+10+z},
-    }
-
-    return fmt.Sprintf(
-      "<polygon points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-      g[0][0],
-      g[0][1],
-      g[1][0],
-      g[1][1],
-      g[2][0],
-      g[2][1],
-      g[3][0],
-      g[3][1],
-      g[4][0],
-      g[4][1],
-      g[5][0],
-      g[5][1],
-      rgb,
-    )
-  })
-  return
-}
-*/
-
 
 func (pxa *pixel_array) Save(dest string) {
 
@@ -346,11 +358,20 @@ func (pxa *pixel_array) Save(dest string) {
   w.Flush()
 }
 
-func write(pxa *pixel_array, pixel_method func([]uint8, int, int) string) {
+func writeContainer(w,h uint) svg_content {
+  return svg_content {
+    start: fmt.Sprintf(
+      "<svg viewbox=\"0 0 %d %d\" xmlns=\"http://www.w3.org/2000/svg\">", 
+      w*10, 
+      h*10,
+    ),
+    end: "</svg>",
+  }
+}
 
-  pxa.svg_content.start = fmt.Sprintf("<svg width=\"%d\" height=\"%d\"  xmlns=\"http://www.w3.org/2000/svg\">", pxa.w*10, pxa.h*10)
+func writeGroup(pxa *pixel_array, frameIndex int, render_method func([]uint8, int, int) string) {
 
-  pxa.svg_content.g += "<g>"
+ pxa.svg_content.g += fmt.Sprintf("<g id=\"f%d\">", frameIndex)
 
   i := 0
 
@@ -360,11 +381,11 @@ func write(pxa *pixel_array, pixel_method func([]uint8, int, int) string) {
     // Iterate over columns
     for col := 0; col < pxa.w; col++ {
 
-      pxa.svg_content.g += pixel_method(
+      pxa.svg_content.g += render_method(
         []uint8{
-          pxa.pixel_data[0][i], 
-          pxa.pixel_data[0][i+1], 
-          pxa.pixel_data[0][i+2],
+          pxa.pixel_data[frameIndex][i], 
+          pxa.pixel_data[frameIndex][i+1], 
+          pxa.pixel_data[frameIndex][i+2],
         },
         col,
         row,
@@ -375,8 +396,6 @@ func write(pxa *pixel_array, pixel_method func([]uint8, int, int) string) {
   }
 
   pxa.svg_content.g += "</g>"
-
-  pxa.svg_content.end = "</svg>"
 
   return
 }
