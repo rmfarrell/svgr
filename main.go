@@ -28,7 +28,7 @@ func main() {
     panic(err.Error())
   }
 
-  lwf := svgr.NewSvgr(imgFiles, 80, "lemmy_guitar")
+  lwf := svgr.NewSvgr(imgFiles, 20, "lemmy_guitar")
 
   // for x:=0; x < len(imgFiles); x++ {
   //   lwf.SingleChannel("red", "#f03c3c", .6, 50, 0, false, x)

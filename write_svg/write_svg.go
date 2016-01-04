@@ -26,7 +26,9 @@ type pixelArray struct {
   name        string
 }
 
-// Constructor
+/*
+* Constructor
+*/
 func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixelArray {
 
   imagick.Initialize()
@@ -64,6 +66,11 @@ func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixelArray {
   }
 }
 
+/*
+* Public Methods
+*/
+
+
 func (px pixelArray) GetSize() int {
 
   return len(px.pixelData)
@@ -82,22 +89,6 @@ func (px *pixelArray) SetName(name string) {
 
 func (px *pixelArray) Reset() {
   px.svgContent.g = ""
-}
-
-/*
-* Public Methods
-*/
-
-// If no frames are passed, return an array of all frames. Otherwise, do nothing
-func normalizeFramesArray(framesIn []int, framesLength int) (framesOut []int) {
-  if len(framesIn) >= 1 {
-    framesOut = framesIn
-  } else {
-    for f:=0; f < framesLength; f++ {
-      framesOut = append(framesOut, f)
-    }
-  }
-  return
 }
 
 func (px *pixelArray) Pixels(frames ...int) {
@@ -345,6 +336,8 @@ func (px *pixelArray) SingleChannel(channelName, color string, opacity float64, 
 
 func (pxa *pixelArray) Save(dest string) {
 
+  fmt.Printf("Saving %s.svg...", pxa.GetName(),)
+
   file, err := os.Create(dest)
   if err != nil {
     panic(err)
@@ -356,6 +349,8 @@ func (pxa *pixelArray) Save(dest string) {
   w:= bufio.NewWriter(file)
   w.WriteString(contents)
   w.Flush()
+
+  fmt.Println("success!")
 }
 
 func writeContainer(w,h uint) svgContent {
@@ -369,9 +364,27 @@ func writeContainer(w,h uint) svgContent {
   }
 }
 
-func writeGroup(pxa *pixelArray, frameIndex int, renderMethod func([]uint8, int, int) string) {
+/*
+* Private Methods
+*/
 
- pxa.svgContent.g += fmt.Sprintf("<g id=\"f%d\">", frameIndex)
+// If no frames are passed, return an array of all frames. Otherwise, do nothing
+func normalizeFramesArray(framesIn []int, framesLength int) (framesOut []int) {
+  if len(framesIn) >= 1 {
+    framesOut = framesIn
+  } else {
+    for f:=0; f < framesLength; f++ {
+      framesOut = append(framesOut, f)
+    }
+  }
+  return
+}
+
+func writeGroup(pxa *pixelArray, groupIndex int, renderMethod func([]uint8, int, int) string) {
+
+  fmt.Printf("writing <g> %d...", groupIndex + 1)
+  
+  pxa.svgContent.g += fmt.Sprintf("<g id=\"f%d\">", groupIndex)
 
   i := 0
 
@@ -383,9 +396,9 @@ func writeGroup(pxa *pixelArray, frameIndex int, renderMethod func([]uint8, int,
 
       pxa.svgContent.g += renderMethod(
         []uint8{
-          pxa.pixelData[frameIndex][i], 
-          pxa.pixelData[frameIndex][i+1], 
-          pxa.pixelData[frameIndex][i+2],
+          pxa.pixelData[groupIndex][i], 
+          pxa.pixelData[groupIndex][i+1], 
+          pxa.pixelData[groupIndex][i+2],
         },
         col,
         row,
@@ -397,12 +410,14 @@ func writeGroup(pxa *pixelArray, frameIndex int, renderMethod func([]uint8, int,
 
   pxa.svgContent.g += "</g>"
 
+  fmt.Println("success!")
+
   return
 }
 
 func shrinkImage(wand *imagick.MagickWand, maxSize int) (w,h uint) {
 
-  w,h = get_dimensions(wand)
+  w,h = getDimensions(wand)
 
   shrinkBy := 1
 
@@ -419,12 +434,12 @@ func shrinkImage(wand *imagick.MagickWand, maxSize int) (w,h uint) {
 
   wand.AdaptiveSharpenImage(0,AdaptiveSharpenVal)
 
-  w,h = get_dimensions(wand)
+  w,h = getDimensions(wand)
 
   return
 }
 
-func get_dimensions(wand *imagick.MagickWand) (w,h uint) {
+func getDimensions(wand *imagick.MagickWand) (w,h uint) {
   h = wand.GetImageHeight()
   w = wand.GetImageWidth()
   return
