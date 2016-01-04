@@ -5,7 +5,6 @@ import (
   // "reflect"
   "os"
   "os/exec"
-  "github.com/gographics/imagick/imagick"
   "github.com/satori/go.uuid"
   "io/ioutil"
   svgr "./write_svg"
@@ -84,13 +83,4 @@ func readFile(file string) *os.File {
   }
   defer reader.Close()
   return reader
-}
-
-func _createImageSeqence(file *os.File) {
-
-  wand := imagick.NewMagickWand()
-
-  wand.ReadImageFile(file)
-
-  fmt.Println(wand)
 }

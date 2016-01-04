@@ -14,20 +14,20 @@ const (
   Funkiness           int       = 6
 )
 
-type svg_content struct {
+type svgContent struct {
   start, g, end string
 }
 
-type pixel_array struct {
-  svg_content
-  pixel_data  [][]uint8
+type pixelArray struct {
+  svgContent
+  pixelData   [][]uint8
   w           int
   h           int
   name        string
 }
 
 // Constructor
-func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixel_array {
+func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixelArray {
 
   imagick.Initialize()
   defer imagick.Terminate()
@@ -35,7 +35,7 @@ func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixel_array {
   var (
     w           uint
     h           uint
-    pixel_data  [][]uint8
+    pixelData   [][]uint8
   )
 
   for _, i := range imageFiles {
@@ -46,42 +46,42 @@ func NewSvgr(imageFiles [][]byte, maxSize int, name string) pixel_array {
       panic(err.Error())
     }
 
-    w,h = shrink_image(wand, maxSize)
+    w,h = shrinkImage(wand, maxSize)
 
     px, err := wand.ExportImagePixels(0,0,w,h,"RGB", imagick.PIXEL_CHAR)
     if err != nil {
       panic(err.Error())
     }
-    pixel_data = append(pixel_data, px.([]uint8))
+    pixelData = append(pixelData, px.([]uint8))
   }
 
-  return pixel_array {
-    svg_content:  writeContainer(w,h),
-    pixel_data:   pixel_data,
+  return pixelArray {
+    svgContent:  writeContainer(w,h),
+    pixelData:   pixelData,
     w:            int(w),
     h:            int(h),
     name:         name,
   }
 }
 
-func (px pixel_array) GetSize() int {
+func (px pixelArray) GetSize() int {
 
-  return len(px.pixel_data)
+  return len(px.pixelData)
 }
 
-func (px pixel_array) GetName() string {
+func (px pixelArray) GetName() string {
 
   return px.name
 }
 
-func (px *pixel_array) SetName(name string) {
+func (px *pixelArray) SetName(name string) {
 
   px.name = name
   return
 }
 
-func (px *pixel_array) Reset() {
-  px.svg_content.g = ""
+func (px *pixelArray) Reset() {
+  px.svgContent.g = ""
 }
 
 /*
@@ -100,8 +100,8 @@ func normalizeFramesArray(framesIn []int, framesLength int) (framesOut []int) {
   return
 }
 
-func (px *pixel_array) Pixels(frames ...int) {
-  // TODO: error/recover from pushing frames that exceed size of pixel_array
+func (px *pixelArray) Pixels(frames ...int) {
+  // TODO: error/recover from pushing frames that exceed size of pixelArray
 
   frames = normalizeFramesArray(frames, px.GetSize())
 
@@ -118,7 +118,7 @@ func (px *pixel_array) Pixels(frames ...int) {
   return
 }
 
-func (px *pixel_array) Dots(frames ...int) {
+func (px *pixelArray) Dots(frames ...int) {
 
   frames = normalizeFramesArray(frames, px.GetSize())
 
@@ -135,7 +135,7 @@ func (px *pixel_array) Dots(frames ...int) {
   return
 }
 
-func (px *pixel_array) Triangles(frames ...int) (svg string, error error) {
+func (px *pixelArray) Triangles(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
 
@@ -179,7 +179,7 @@ func (px *pixel_array) Triangles(frames ...int) (svg string, error error) {
   return
 }
 
-func (px *pixel_array) FunkyTriangles(frames ...int) (svg string, error error) {
+func (px *pixelArray) FunkyTriangles(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
 
@@ -224,7 +224,7 @@ func (px *pixel_array) FunkyTriangles(frames ...int) (svg string, error error) {
   return
 }
 
-func (px *pixel_array) FunkySquares(frames ...int) (svg string, error error) {
+func (px *pixelArray) FunkySquares(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
 
@@ -259,7 +259,7 @@ func (px *pixel_array) FunkySquares(frames ...int) (svg string, error error) {
   return
 }
 
-func (px *pixel_array) Hexagons(frames ...int) (svg string, error error) {
+func (px *pixelArray) Hexagons(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
 
@@ -306,10 +306,10 @@ func (px *pixel_array) Hexagons(frames ...int) (svg string, error error) {
   return
 }
 
-func (px *pixel_array) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool, frames ...int) {
+func (px *pixelArray) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool, frames ...int) {
 
   channel      := 0
-  color_offset := uint8(0)
+  colorOffset := uint8(0)
 
   switch channelName {
   case "red" :
@@ -321,9 +321,9 @@ func (px *pixel_array) SingleChannel(channelName, color string, opacity float64,
   }
 
   if negative {
-    color_offset = 0
+    colorOffset = 0
   } else {
-    color_offset = 255
+    colorOffset = 255
   }
 
 
@@ -332,7 +332,7 @@ func (px *pixel_array) SingleChannel(channelName, color string, opacity float64,
     writeGroup(px, frame, func(rgb []uint8, x,y int) string {
       return fmt.Sprintf(
         "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", 
-        (color_offset-rgb[channel])/scale, 
+        (colorOffset-rgb[channel])/scale, 
         y*10+offset, 
         x*10+offset, 
         opacity, 
@@ -343,7 +343,7 @@ func (px *pixel_array) SingleChannel(channelName, color string, opacity float64,
   return
 }
 
-func (pxa *pixel_array) Save(dest string) {
+func (pxa *pixelArray) Save(dest string) {
 
   file, err := os.Create(dest)
   if err != nil {
@@ -351,15 +351,15 @@ func (pxa *pixel_array) Save(dest string) {
   }
   defer file.Close()
 
-  contents := pxa.svg_content.start + pxa.svg_content.g + pxa.svg_content.end
+  contents := pxa.svgContent.start + pxa.svgContent.g + pxa.svgContent.end
 
   w:= bufio.NewWriter(file)
   w.WriteString(contents)
   w.Flush()
 }
 
-func writeContainer(w,h uint) svg_content {
-  return svg_content {
+func writeContainer(w,h uint) svgContent {
+  return svgContent {
     start: fmt.Sprintf(
       "<svg viewbox=\"0 0 %d %d\" xmlns=\"http://www.w3.org/2000/svg\">", 
       w*10, 
@@ -369,9 +369,9 @@ func writeContainer(w,h uint) svg_content {
   }
 }
 
-func writeGroup(pxa *pixel_array, frameIndex int, render_method func([]uint8, int, int) string) {
+func writeGroup(pxa *pixelArray, frameIndex int, renderMethod func([]uint8, int, int) string) {
 
- pxa.svg_content.g += fmt.Sprintf("<g id=\"f%d\">", frameIndex)
+ pxa.svgContent.g += fmt.Sprintf("<g id=\"f%d\">", frameIndex)
 
   i := 0
 
@@ -381,11 +381,11 @@ func writeGroup(pxa *pixel_array, frameIndex int, render_method func([]uint8, in
     // Iterate over columns
     for col := 0; col < pxa.w; col++ {
 
-      pxa.svg_content.g += render_method(
+      pxa.svgContent.g += renderMethod(
         []uint8{
-          pxa.pixel_data[frameIndex][i], 
-          pxa.pixel_data[frameIndex][i+1], 
-          pxa.pixel_data[frameIndex][i+2],
+          pxa.pixelData[frameIndex][i], 
+          pxa.pixelData[frameIndex][i+1], 
+          pxa.pixelData[frameIndex][i+2],
         },
         col,
         row,
@@ -395,12 +395,12 @@ func writeGroup(pxa *pixel_array, frameIndex int, render_method func([]uint8, in
     }
   }
 
-  pxa.svg_content.g += "</g>"
+  pxa.svgContent.g += "</g>"
 
   return
 }
 
-func shrink_image(wand *imagick.MagickWand, maxSize int) (w,h uint) {
+func shrinkImage(wand *imagick.MagickWand, maxSize int) (w,h uint) {
 
   w,h = get_dimensions(wand)
 
