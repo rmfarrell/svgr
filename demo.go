@@ -7,7 +7,7 @@ import (
   "os/exec"
   "github.com/satori/go.uuid"
   "io/ioutil"
-  svgr "./write_svg"
+  svgr "./svgr"
 )
 
 const (
