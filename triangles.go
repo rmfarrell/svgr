@@ -1,48 +1,59 @@
 package svgr
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// Draw the image as a field of interlocking triangles
-func (px *pixelArray) Triangles(frames ...int) (svg string, error error) {
+func (m *Mosaic) Triangles() string {
 
-  for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
+	return m.render(func() string {
 
-    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
+		x := m.current.X * shapeSize
+		y := m.current.Y * shapeSize
+		poly := [3]*point{}
 
-      x = x*10
-      y = y*10
-      g := [][]int{}
+		if m.current.X%2 == 0 {
+			// Draw down-pointing triangle
+			poly = [3]*point{
+				&point{
+					x - 4,
+					y,
+				},
+				&point{
+					x + 16,
+					y,
+				},
+				&point{
+					x + 6,
+					y + 10,
+				},
+			}
+		} else {
+			poly = [3]*point{
+				&point{
+					x - 4,
+					y + 10,
+				},
+				&point{
+					x + 16,
+					y + 10,
+				},
+				&point{
+					x + 6,
+					y,
+				},
+			}
+		}
 
-      if x/10 % 2 == 0 {
-        
-        // Draw down-pointing triangle
-        g = [][]int {
-          []int {x-4,y+0},
-          []int {x+16,y+0},
-          []int {x+6,y+10},
-        }
-
-      } else {
-
-        // Draw up-pointing triangle
-        g = [][]int {
-          []int {x-4,y+10},
-          []int {x+16,y+10},
-          []int {x+6,y+0},
-        }
-      }
-
-      return fmt.Sprintf(
-        "<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"#%x\"/>",
-        g[0][0],
-        g[0][1],
-        g[1][0],
-        g[1][1],
-        g[2][0],
-        g[2][1],
-        rgb,
-      )
-    })
-  }
-  return
+		return fmt.Sprintf(
+			"<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"%s\"/>",
+			poly[0].x,
+			poly[0].y,
+			poly[1].x,
+			poly[1].y,
+			poly[2].x,
+			poly[2].y,
+			m.colorAtCurrent(),
+		)
+	})
 }

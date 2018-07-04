@@ -1,11 +1,7 @@
 package svgr
 
-import (
-  "math/rand"
-  "fmt"
-)
-
 // Draw the image as a field of interlocking triangles but with random angles thrown in.
+/*
 func (px *pixelArray) FunkyTriangles(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
@@ -18,7 +14,7 @@ func (px *pixelArray) FunkyTriangles(frames ...int) (svg string, error error) {
       f := rand.Intn(Funkiness)
 
       if x/10 % 2 == 0 {
-        
+
         // Draw down-pointing triangle
         g = [][]int {
           []int {x-f,y+f},
@@ -50,3 +46,4 @@ func (px *pixelArray) FunkyTriangles(frames ...int) (svg string, error error) {
   }
   return
 }
+*/

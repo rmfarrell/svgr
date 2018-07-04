@@ -1,7 +1,5 @@
 package svgr
 
-import "fmt"
-
 /*
 * Draw the image as a dot matrix representing a single color channel (ie r,g, or b)
 * Combine multiple channels in the by calling this in for loop with the iterator pointing at the same frame
@@ -11,10 +9,11 @@ import "fmt"
 * @param scale {uint8} increase or decrease the size of the dot.
 * @param offset {int} shift position of the dot matrix to replicate a screen print effect
 * @param negative {boolean} set to true to get the negative values from the input. A
-*   false: represents the positive value of the r,g, or b channel from the input. 
+*   false: represents the positive value of the r,g, or b channel from the input.
 *   true:  represents the negative value.
 * @param frames {...int} selectively apply this treatment to a comma separated list of indeces of images. See above.
-*/
+ */
+/*
 func (px *pixelArray) SingleChannel(channelName, color string, opacity float64, scale uint8, offset int, negative bool, frames ...int) {
 
   channel      := 0
@@ -39,14 +38,15 @@ func (px *pixelArray) SingleChannel(channelName, color string, opacity float64, 
 
     writeGroup(px, frame, func(rgb []uint8, x,y int) string {
       return fmt.Sprintf(
-        "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>", 
-        (colorOffset-rgb[channel])/scale, 
-        y*10+offset, 
-        x*10+offset, 
-        opacity, 
+        "<circle r=\"%d\" cy=\"%d\" cx=\"%d\" opacity=\"%f\" fill=\"%s\"/>",
+        (colorOffset-rgb[channel])/scale,
+        y*10+offset,
+        x*10+offset,
+        opacity,
         color,
       )
     })
   }
   return
 }
+*/

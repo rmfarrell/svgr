@@ -1,8 +1,7 @@
 package svgr
 
-import "fmt"
-
 // Draw the image as a field of interlocking hexagons
+/*
 func (px *pixelArray) Hexagons(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
@@ -49,3 +48,4 @@ func (px *pixelArray) Hexagons(frames ...int) (svg string, error error) {
   }
   return
 }
+*/

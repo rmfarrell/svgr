@@ -1,11 +1,7 @@
 package svgr
 
-import (
-  "fmt"
-  "math/rand"
-)
-
 // Draw the image as a field of rectangles with random angles thrown in.
+/*
 func (px *pixelArray) FunkySquares(frames ...int) (svg string, error error) {
 
   for _, frame := range normalizeFramesArray(frames, px.GetSize()) {
@@ -40,3 +36,4 @@ func (px *pixelArray) FunkySquares(frames ...int) (svg string, error error) {
   }
   return
 }
+*/
