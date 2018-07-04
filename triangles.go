@@ -2,19 +2,22 @@ package svgr
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
-func (m *Mosaic) Triangles() string {
+func (m *Mosaic) Triangles(rnd int) string {
+	src := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	return m.render(func() string {
 
 		x := m.current.X * shapeSize
 		y := m.current.Y * shapeSize
-		poly := [3]*point{}
+		triangle := [3]*point{}
 
 		if m.current.X%2 == 0 {
 			// Draw down-pointing triangle
-			poly = [3]*point{
+			triangle = [3]*point{
 				&point{
 					x - 4,
 					y,
@@ -30,7 +33,7 @@ func (m *Mosaic) Triangles() string {
 			}
 		} else {
 			// Draw up-pointing triangle
-			poly = [3]*point{
+			triangle = [3]*point{
 				&point{
 					x - 4,
 					y + 10,
@@ -46,14 +49,20 @@ func (m *Mosaic) Triangles() string {
 			}
 		}
 
+		if rnd > 0 {
+			for _, pt := range triangle {
+				pt.randomize(*src, rnd)
+			}
+		}
+
 		return fmt.Sprintf(
 			"<polygon points=\"%d,%d %d,%d %d,%d\" fill=\"%s\"/>",
-			poly[0].x,
-			poly[0].y,
-			poly[1].x,
-			poly[1].y,
-			poly[2].x,
-			poly[2].y,
+			triangle[0].x,
+			triangle[0].y,
+			triangle[1].x,
+			triangle[1].y,
+			triangle[2].x,
+			triangle[2].y,
 			m.colorAtCurrent(),
 		)
 	})

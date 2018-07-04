@@ -3,6 +3,7 @@ package svgr
 import (
 	"fmt"
 	"image"
+	"math/rand"
 	"os"
 
 	_ "image/gif"
@@ -95,4 +96,20 @@ func (m *Mosaic) colorAtCurrent() string {
 	sample := m.img.At(m.current.X, m.current.Y)
 	r, g, b, a := sample.RGBA()
 	return fmt.Sprintf("rgba(%d, %d, %d, %d)", uint8(r), uint8(g), uint8(b), uint8(a))
+}
+
+// Randomize the position of point
+func (p *point) randomize(r rand.Rand, lvl int) {
+	p.x = p.x + randomizeSign(r.Intn(lvl), r)
+	p.y = p.y + randomizeSign(r.Intn(lvl), r)
+}
+
+// randomize whether an int is positive or negative
+func randomizeSign(in int, r rand.Rand) int {
+	out := in
+	pos := r.Intn(2)
+	if pos == 0 {
+		out = out * -1
+	}
+	return out
 }

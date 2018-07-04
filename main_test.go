@@ -1,7 +1,6 @@
 package svgr_test
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -60,8 +59,7 @@ func TestMain(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	svg := m.Triangles()
-	fmt.Println(svg)
+	svg := m.Triangles(3)
 	if svg == "" {
 		t.Error("svg should not be blank")
 	}
