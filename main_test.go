@@ -1,11 +1,21 @@
 package svgr_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/rmfarrell/svgr"
 )
+
+var input svgr.Input = svgr.Input{
+	Path: "./testdata/doge.png",
+	Resolution: &svgr.Resolution{
+		Width:  10,
+		Height: 10,
+	},
+	ID: "",
+}
 
 func TestNewMosaic(t *testing.T) {
 	t.Skip()
@@ -47,19 +57,25 @@ func TestNewMosaic(t *testing.T) {
 	}
 }
 
-func TestMain(t *testing.T) {
-	m, err := svgr.NewMosaic(&svgr.Input{
-		Path: "./testdata/doge.png",
-		Resolution: &svgr.Resolution{
-			Width:  10,
-			Height: 10,
-		},
-		ID: "",
-	})
+func TestTriangles(t *testing.T) {
+	m, err := svgr.NewMosaic(&input)
 	if err != nil {
 		t.Error(err)
 	}
 	svg := m.Triangles(3)
+	if svg == "" {
+		t.Error("svg should not be blank")
+	}
+	// TODO: test number of polygons
+}
+
+func TestSquares(t *testing.T) {
+	m, err := svgr.NewMosaic(&input)
+	if err != nil {
+		t.Error(err)
+	}
+	svg := m.Squares(0)
+	fmt.Println(svg)
 	if svg == "" {
 		t.Error("svg should not be blank")
 	}
