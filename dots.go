@@ -1,20 +1,19 @@
 package svgr
 
-// Draw the image as a field of circles
-/*
-func (px *pixelArray) Dots(frames ...int) {
+import (
+	"fmt"
+)
 
-  frames = normalizeFramesArray(frames, px.GetSize())
+func (m *Mosaic) Dots(size float64) string {
 
-  for _, frame := range frames {
-    writeGroup(px, frame, func(rgb []uint8, x,y int) string {
-      return fmt.Sprintf(
-        "<circle r=\"5px\" cy=\"%d\" cx=\"%d\" fill=\"#%x\"/>",
-        y*10,
-        x*10,
-        rgb,
-      )
-    })
-  }
-  return
-}*/
+	return m.render(func() string {
+
+		return fmt.Sprintf(
+			"<circle r=\"%.2fpx\" cy=\"%d\" cx=\"%d\" fill=\"%s\"/>",
+			size*0.5*float64(shapeSize),
+			m.current.X*shapeSize+5,
+			m.current.Y*shapeSize+5,
+			m.colorAtCurrent(),
+		)
+	})
+}

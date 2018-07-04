@@ -95,7 +95,7 @@ func (m *Mosaic) next() *image.Point {
 func (m *Mosaic) colorAtCurrent() string {
 	sample := m.img.At(m.current.X, m.current.Y)
 	r, g, b, a := sample.RGBA()
-	return fmt.Sprintf("rgba(%d, %d, %d, %d)", uint8(r), uint8(g), uint8(b), uint8(a))
+	return fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(r), uint8(g), uint8(b), uint8(a))
 }
 
 // Randomize the position of point
