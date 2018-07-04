@@ -19,7 +19,7 @@ func (m *Mosaic) Triangles(rnd int) string {
 
 		if m.current.X%2 == 0 {
 			// Draw down-pointing triangle
-			tri = [3]*point{
+			tri = triangle{
 				&point{
 					x - 4,
 					y,
@@ -35,7 +35,7 @@ func (m *Mosaic) Triangles(rnd int) string {
 			}
 		} else {
 			// Draw up-pointing triangle
-			tri = [3]*point{
+			tri = triangle{
 				&point{
 					x - 4,
 					y + 10,

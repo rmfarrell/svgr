@@ -79,13 +79,22 @@ func TestSquares(t *testing.T) {
 		t.Error("svg should not be blank")
 	}
 }
-
 func TestDots(t *testing.T) {
 	m, err := svgr.NewMosaic(&input)
 	if err != nil {
 		t.Error(err)
 	}
 	svg := m.Dots(0.8)
+	if svg == "" {
+		t.Error("svg should not be blank")
+	}
+}
+func TestHexagaons(t *testing.T) {
+	m, err := svgr.NewMosaic(&input)
+	if err != nil {
+		t.Error(err)
+	}
+	svg := m.Hexagons()
 	fmt.Println(svg)
 	if svg == "" {
 		t.Error("svg should not be blank")
