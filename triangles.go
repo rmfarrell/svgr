@@ -29,6 +29,7 @@ func (m *Mosaic) Triangles() string {
 				},
 			}
 		} else {
+			// Draw up-pointing triangle
 			poly = [3]*point{
 				&point{
 					x - 4,
