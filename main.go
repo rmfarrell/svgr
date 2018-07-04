@@ -13,7 +13,9 @@ import (
 	"github.com/nfnt/resize"
 )
 
-const shapeSize = 10
+// TODO: It might make sense to move this to the Input struct
+// But SVGs are scalable so I'm not convinced we should.
+const shapeSize = 20
 
 type Input struct {
 	Path       string      `json:path`
@@ -58,7 +60,11 @@ func NewMosaic(in *Input) (*Mosaic, error) {
 	h := bounds.Max.Y
 
 	// open the svg
-	svg := fmt.Sprintf("<svg viewbox=\"0 0 %d %d\" xmlns=\"http://www.w3.org/2000/svg\">", w, h)
+	svg := fmt.Sprintf(
+		"<svg viewBox=\"0 0 %d %d\" xmlns=\"http://www.w3.org/2000/svg\">",
+		w*shapeSize,
+		h*shapeSize,
+	)
 
 	return &Mosaic{img, in.ID, &image.Point{0, 0}, svg, w, h}, nil
 }

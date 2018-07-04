@@ -1,7 +1,7 @@
 package svgr_test
 
 import (
-	"fmt"
+	"io/ioutil"
 	"reflect"
 	"testing"
 
@@ -95,8 +95,58 @@ func TestHexagaons(t *testing.T) {
 		t.Error(err)
 	}
 	svg := m.Hexagons()
-	fmt.Println(svg)
 	if svg == "" {
 		t.Error("svg should not be blank")
 	}
+}
+
+func TestHalftone(t *testing.T) {
+	m, err := svgr.NewMosaic(&svgr.Input{
+		Path: "./testdata/normal-guy.jpg",
+		Resolution: &svgr.Resolution{
+			Width:  60,
+			Height: 60,
+		},
+		ID: "",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	svg, err := m.Halftone(svgr.ScreenSet{
+		&svgr.Screen{
+			Color:      "r",
+			Saturation: 50,
+			Lightness:  50,
+		},
+		&svgr.Screen{
+			Color:      "g",
+			Saturation: 50,
+			Lightness:  50,
+		},
+		&svgr.Screen{
+			Color:      "b",
+			Saturation: 50,
+			Lightness:  50,
+		},
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = writeFile(svg)
+	if err != nil {
+		t.Error(err)
+	}
+	if svg == "" {
+		t.Error("svg should not be blank")
+	}
+}
+
+func writeFile(in string) error {
+	b := []byte(in)
+	err := ioutil.WriteFile("./out.svg", b, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
