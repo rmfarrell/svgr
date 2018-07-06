@@ -38,7 +38,7 @@ type hsla struct {
 }
 
 var (
-	allowedColors                = []string{"r", "g", "b", "a", "c", "m", "y", "k"}
+	allowedColors                = []string{"r", "g", "b", "c", "m", "y", "k"}
 	hues          map[string]int = map[string]int{
 		"r": 0,
 		"g": 120,
@@ -70,7 +70,7 @@ func (m *Mosaic) Halftone(sn ScreenSet) (string, error) {
 			}
 		}
 		if isAllowed == false {
-			return "", fmt.Errorf("%s is not allowed for Color. Must be one of r,b,a,c,m,y,k", c.Color)
+			return "", fmt.Errorf("%s is not allowed for Color. Must be one of r,g,b,c,m,y,k", c.Color)
 		}
 
 		// Lightness and Saturation are between 0 and 1
